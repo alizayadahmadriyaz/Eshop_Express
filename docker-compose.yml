@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    container_name: node_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET_USER=${JWT_SECRET_USER}
+    command: npm start
+    volumes:
+      - .:/app
+
+  worker:
+    build: .
+    container_name: cart_worker
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGO_URI=${MONGO_URI}
+    command: npm run worker
+    volumes:
+      - .:/app
+
+  redis:
+    image: redis:7
+    container_name: redis_server
+    ports:
+      - "6379:6379"
